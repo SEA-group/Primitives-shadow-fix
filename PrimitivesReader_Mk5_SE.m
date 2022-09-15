@@ -1,13 +1,12 @@
-% version 2022.08.12.a
-% requires NormalConvertor_Mk2.m
+% version 2022.09.12.a
 
 function [isModified, primCodeModified] = PrimitivesReader_Mk5_SE(fileName)
        
     %% open file and read in bytes
 
-    primFile=fopen(fileName, 'r');
-    primCode=fread(primFile);
-    primCodeLength=length(primCode);
+    primFile = fopen(fileName, 'r');
+    primCode = fread(primFile);
+    primCodeLength = length(primCode);
 
     fclose(primFile);
     clear primFile;
@@ -19,47 +18,47 @@ function [isModified, primCodeModified] = PrimitivesReader_Mk5_SE(fileName)
 
     %% read sectionName part
 
-    sectionNamesSectionLength=primCode(primCodeLength) * 256^3 + primCode(primCodeLength - 1) * 256^2 + primCode(primCodeLength - 2) * 256 + primCode(primCodeLength - 3);
-    sectionNamesSectionStart=primCodeLength - 4 - sectionNamesSectionLength + 1;
-    sectionNamesSectionEnd=primCodeLength - 4;
+    sectionNamesSectionLength = primCode(primCodeLength) * 256^3 + primCode(primCodeLength - 1) * 256^2 + primCode(primCodeLength - 2) * 256 + primCode(primCodeLength - 3);
+    sectionNamesSectionStart = primCodeLength - 4 - sectionNamesSectionLength + 1;
+    sectionNamesSectionEnd = primCodeLength - 4;
 
-    cursor=sectionNamesSectionStart;
-    sectionCount=0;
+    cursor = sectionNamesSectionStart;
+    sectionCount = 0;
 
     while cursor < sectionNamesSectionEnd
 
         sectionCount=sectionCount+1;
 
         % get the length of the coresponding section
-        sectionSize(sectionCount)=primCode(cursor + 3) * 256^3 + primCode(cursor + 2) * 256^2 + primCode(cursor +1) * 256 + primCode(cursor);
+        sectionSize(sectionCount) = primCode(cursor + 3) * 256^3 + primCode(cursor + 2) * 256^2 + primCode(cursor +1) * 256 + primCode(cursor);
 
         % get the length of the section's name
-        cursor=cursor+4+16;
-        currentSectionNameLength=primCode(cursor + 3) * 256^3 + primCode(cursor + 2) * 256^2 + primCode(cursor +1) * 256 + primCode(cursor);
-        currentSectionNameLength=4*ceil(currentSectionNameLength/4);
+        cursor = cursor + 4 + 16;
+        currentSectionNameLength = primCode(cursor + 3) * 256^3 + primCode(cursor + 2) * 256^2 + primCode(cursor +1) * 256 + primCode(cursor);
+        currentSectionNameLength = 4 * ceil(currentSectionNameLength/4);
 
         % get the section's name
-        cursor=cursor+4;
-        sectionName{sectionCount}=native2unicode(primCode(cursor: cursor+currentSectionNameLength-1)');
+        cursor = cursor + 4;
+        sectionName{sectionCount} = native2unicode(primCode(cursor: cursor+currentSectionNameLength-1)');
 
         % get the section type
-        sectionClass{sectionCount}=sectionName{sectionCount}((strfind(sectionName{sectionCount}, '.')+1): end);
+        sectionClass{sectionCount} = sectionName{sectionCount}((strfind(sectionName{sectionCount}, '.')+1): end);
 
-        cursor=cursor+currentSectionNameLength;
+        cursor = cursor + currentSectionNameLength;
 
     end
 
     % the following lines are not necessary, but I prefer vertical arrays :)
-    sectionSize=sectionSize';
-    sectionClass=sectionClass';
+    sectionSize = sectionSize';
+    sectionClass = sectionClass';
 
     clear cursor sectionCount currentSectionNameLength sectionName;
 
     %% read sections
 
-    cursor=5;
+    cursor = 5;
 
-    for indSect=1: length(sectionSize)
+    for indSect = 1: length(sectionSize)
 
         if length(sectionClass{indSect}) >7 && strcmp(sectionClass{indSect}(1: 8), 'vertices')
 
@@ -91,7 +90,7 @@ function [isModified, primCodeModified] = PrimitivesReader_Mk5_SE(fileName)
 
         end
 
-        cursor=cursor+4*ceil(sectionSize(indSect)/4);
+        cursor = cursor + 4 * ceil(sectionSize(indSect)/4);
 
     end
 
